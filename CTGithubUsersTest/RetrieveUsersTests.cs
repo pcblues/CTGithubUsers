@@ -75,5 +75,19 @@ namespace CTGithubUsersTest
 
             Assert.Fail("Test not implemented");
         }
+
+        [Fact]
+        public void TestUserDuplicateNameHandling()
+        {
+
+            Assert.Fail("Test not implemented");
+        }
+
+        [Fact]
+        public void TestAlphaSort()
+        {
+
+            Assert.Fail("Test not implemented");
+        }
     }
 }
