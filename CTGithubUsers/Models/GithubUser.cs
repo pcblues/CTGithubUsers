@@ -2,11 +2,11 @@
 {
     public class GithubUser
     {
-        public string? Name { get;  }
-        public string? Login { get;  }
-        public string? Company { get;  }
-        public int NumberFollowers { get;  }
-        public int NumberRepositories { get;  }
+        public string? Name { get; set; } 
+        public string? Login { get; set; } 
+        public string? Company { get; set; } 
+        public int NumberFollowers { get; set; }
+        public int NumberRepositories { get; set; }
         public double AverageFollowersPerRepository {
             get {
                 // followers/repositories

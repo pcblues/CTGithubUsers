@@ -1,83 +1,107 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CTGithubUsers.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Extensions;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Xml.Linq;
 
 namespace CTGithubUsers.Controllers
 {
-    public class GithubUserController : Controller
+    [ApiController]
+    [Route("retrieveUsers")]
+    public class GithubUserController : ControllerBase
     {
-        // GET: GithubUserController
-        public ActionResult Index()
+
+        
+
+        private readonly ILogger<GithubUserController> _logger;
+
+        public GithubUserController(ILogger<GithubUserController> logger)
         {
-            return View();
+            _logger = logger;
         }
 
-        // GET: GithubUserController/Details/5
-        public ActionResult Details(int id)
+
+        [HttpGet]
+        public IEnumerable<GithubUser> Get([FromQuery] List<string> username)
         {
-            return View();
+            List<GithubUser> result = new List<GithubUser>();
+
+            // Remove duplicates
+            List<string> noDupes = username.Distinct().ToList();
+
+
+            // Use GraphQL to get users
+            result = GetGithubUsers(noDupes);
+
+            
+            return result;
+
         }
 
-        // GET: GithubUserController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
 
-        // POST: GithubUserController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        [NonAction]
+        public  List<GithubUser> GetGithubUsers (List<string> userNames)
         {
-            try
+            List<GithubUser> result = new List<GithubUser>();
+
+
+            using (HttpClient httpClient = new HttpClient { BaseAddress = new Uri("https://api.github.com/users/") })
             {
-                return RedirectToAction(nameof(Index));
+                // Needed for request to work
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "ThisApp");
+
+                // iterates in order?
+                foreach (string userName in userNames)
+                {
+                    try
+                    {
+                        var myRequest = new HttpRequestMessage(HttpMethod.Get, httpClient.BaseAddress + userName);
+
+                        using (var myResponse = httpClient.Send(myRequest))
+                        {
+                            dynamic responseObj;
+
+                            myResponse.EnsureSuccessStatusCode();
+                            var response = myResponse.Content.ReadAsStringAsync().Result;
+
+                            responseObj = JsonConvert.DeserializeObject<dynamic>(response);
+                            
+                            GithubUser user = new GithubUser
+                            {
+                                Name = responseObj.name,
+                                Company = responseObj.company,
+                                NumberFollowers = responseObj.followers,
+                                NumberRepositories = responseObj.public_repos,
+                                Login = responseObj.login
+                            };
+                            result.Add(user);
+
+
+
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+
+                }
+
+
             }
-            catch
-            {
-                return View();
-            }
+
+
+            // sort by name
+            return result.OrderBy(u => u.Name).ToList() ;
+
+
+
         }
 
-        // GET: GithubUserController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
 
-        // POST: GithubUserController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: GithubUserController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: GithubUserController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

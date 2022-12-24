@@ -1,93 +1,177 @@
+using CTGithubUsers.Controllers;
+using Microsoft.Extensions.Logging;
+using Moq;
+
 namespace CTGithubUsersTest
 {
     public class RetrieveUsersTests
     {
+
+        // valid users: pcblues, microsoft, trebonian, blaze , string
+        // invalid users: mxxxxx1
+
+
+
+
         [Fact]
         public void TestNoUser()
         {
-            //Arrange
-            //var fakeOrderId = "12";
-            //var fakeOrder = GetFakeOrder();
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
 
-            //...
+            List<string> userNames = new List<string> {  };
 
-            //Act
-            //var orderController = new OrderController(
-            //    _orderServiceMock.Object,
-            //    _basketServiceMock.Object,
-            //    _identityParserMock.Object);
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
 
-            //orderController.ControllerContext.HttpContext = _contextMock.Object;
-            //var actionResult = await orderController.Detail(fakeOrderId);
-
-            //Assert
-            //var viewResult = Assert.IsType<ViewResult>(actionResult);
-            //Assert.IsAssignableFrom<Order>(viewResult.ViewData.Model);
-
-            Assert.Fail("Test not implemented");
+            // Assert
+            Assert.True(users.Count == 0);
         }
 
         [Fact]
         public void TestOneUserValid()
         {
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
 
-            Assert.Fail("Test not implemented");
+            List<string> userNames = new List<string> { "pcblues" };
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users.Count == 1);
         }
 
         [Fact]
         public void TestOneUserInvalid()
         {
 
-            Assert.Fail("Test not implemented");
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
+
+            List<string> userNames = new List<string> { "mxxxxx1" };
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users.Count == 0);
         }
 
         [Fact]
         public void TestMultiUserValid()
         {
 
-            Assert.Fail("Test not implemented");
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
+
+            List<string> userNames = new List<string> { "pcblues", "microsoft", "trebonian", "blaze", "string" };
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users.Count == 5);
         }
 
         [Fact]
         public void TestMultiUserOneInvalid()
         {
 
-            Assert.Fail("Test not implemented");
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
+
+            List<string> userNames = new List<string> { "pcblues", "microsoft", "trebonian", "blaze", "string","mxxxxx1" };
+
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users.Count == 5);
         }
 
         [Fact]
         public void TestMultiUserAllInvalid()
         {
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
 
-            Assert.Fail("Test not implemented");
+            List<string> userNames = new List<string> { "mxxxxx1","yxxxxx1" };
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users.Count == 0);
         }
 
         [Fact]
         public void TestMultiUserAlphaOrder()
         {
 
-            Assert.Fail("Test not implemented");
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
+
+            List<string> userNames = new List<string> { "pcblues", "microsoft", "trebonian", "blaze", "string" };
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            var sortUsers = users.OrderBy(x => x.Name).ToList();
+            bool same = true;
+            int cnt = sortUsers.Count();
+            for (int i = 0; i < cnt; i++)
+            {
+                if (users[i].Name != sortUsers[i].Name) { same = false;break; }
+
+            }
+
+            Assert.True(same == true);
         }
 
         [Fact]
         public void TestUserAverageZeroReps()
         {
 
-            Assert.Fail("Test not implemented");
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
+
+            List<string> userNames = new List<string> { "string" };
+
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users[0].NumberRepositories == 0);
+            Assert.True(users[0].AverageFollowersPerRepository == 0);
         }
 
         [Fact]
         public void TestUserDuplicateNameHandling()
         {
 
-            Assert.Fail("Test not implemented");
-        }
+            // Arrange
+            var logger = Mock.Of<ILogger<GithubUserController>>();
+            var ghuController = new GithubUserController(logger);
 
-        [Fact]
-        public void TestAlphaSort()
-        {
+            List<string> userNames = new List<string> { "pcblues","pcblues","pcblues" };
 
-            Assert.Fail("Test not implemented");
+            // Act
+            var users = ghuController.GetGithubUsers(userNames);
+
+            // Assert
+            Assert.True(users.Count == 1);
         }
-    }
+}
 }
