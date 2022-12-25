@@ -34,7 +34,7 @@ namespace CTGithubUsers.Controllers
             List<string> noDupes = username.Distinct().ToList();
 
 
-            // Use GraphQL to get users
+            // Use Github API to get users
             result = GetGithubUsers(noDupes);
 
             
